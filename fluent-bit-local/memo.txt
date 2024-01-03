@@ -1,0 +1,44 @@
+https://docs.fluentbit.io/manual/v/1.6/pipeline/outputs/s3#getting-started
+        
+    [OUTPUT]
+        Name s3
+        Match kube.*
+        bucket developer-group-storage
+        region ap-northeast-2
+        s3_key_format /$TAG[2]/$TAG[0]/%Y/%m/%d/%H/$UUID.log
+        s3_key_format_tag_delimiters -
+
+    [OUTPUT]
+        Name s3
+        Match kube.*
+        bucket chunjae-aidt-data-storage
+        endpoint https://kr.object.ncloudstorage.com
+        s3_key_format /$TAG[2]/$TAG[0]/%Y%m%d/%H/$UUID.log
+        s3_key_format_tag_delimiters -
+
+
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Merge_Log_Trim On
+        Labels On
+        Annotations Off
+        K8S-Logging.Parser Off
+        K8S-Logging.Exclude Off
+
+    [FILTER]
+        Name nest
+        Match kube.*
+        Operation nest
+        Nested_under kubernetes
+        Add_prefix kubernetes_
+
+    [FILTER]
+        Name modify
+        Match kube.*
+        Rename log content
+        Remove kubernetes_docker_id
+        Remove kubernetes_container_name
+        Remove kubernetes_container_hash
+        Remove kubernetes_container_image
